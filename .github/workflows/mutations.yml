@@ -1,0 +1,31 @@
+name: mutations
+
+# Every check must bite. Slow, so callers run it nightly and on changes to tests, not on every push.
+#   uses: KaaS-team/.github/.github/workflows/mutations.yml@v1
+on:
+  workflow_call:
+    inputs:
+      runner:
+        type: string
+        default: ubuntu-latest
+      bun-version:
+        type: string
+        default: "1.3"
+      timeout-minutes:
+        description: Nightly runs get at most 9 minutes.
+        type: number
+        default: 9
+
+jobs:
+  check-mutations:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ inputs.bun-version }}
+      - run: make install
+      - run: make check-mutations
